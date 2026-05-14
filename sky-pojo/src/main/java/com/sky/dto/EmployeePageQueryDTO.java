@@ -2,7 +2,9 @@ package com.sky.dto;
 
 import lombok.Data;
 
+import javax.xml.transform.Result;
 import java.io.Serializable;
+
 
 @Data
 public class EmployeePageQueryDTO implements Serializable {
@@ -17,3 +19,4 @@ public class EmployeePageQueryDTO implements Serializable {
     private int pageSize;
 
 }
+
