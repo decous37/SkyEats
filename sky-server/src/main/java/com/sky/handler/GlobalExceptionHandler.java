@@ -39,6 +39,6 @@ public class GlobalExceptionHandler {
             return Result.error(MessageConstant.UNKNOWN_ERROR);
         }
     }
-    //Email tests
+    //Email
 
 }
