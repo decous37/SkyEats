@@ -83,4 +83,16 @@ public class DishServiceImpl implements DishService {
 
         dishFlavorMapper.deleteByDishIds(ids);
     }
+
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        Dish dish = Dish.builder()
+                .id(id)
+                .status(status)
+                .updateTime(LocalDateTime.now())
+                .updateUser(BaseContext.getCurrentId())
+                .build();
+
+        dishMapper.update(dish);
+    }
 }
