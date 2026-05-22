@@ -45,7 +45,7 @@ public class CommonController {
 //            String objectName = UUID.randomUUID().toString() + extension;
 
             //保存到本地路径，因为暂时没有阿里云oss账户
-            String dirPath = "E:\\TempFiles\\software\\Frontend\\nginx-1.20.2\\html\\upload";            File dir = new File(dirPath);
+            String dirPath = "E:\\TempFiles\\software\\Frontend\\nginx-1.20.2\\html\\sky\\upload";            File dir = new File(dirPath);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
