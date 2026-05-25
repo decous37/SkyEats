@@ -66,7 +66,7 @@ public interface DishMapper {
     List<Dish> list(Dish dish);
 
     /**
-     * 根据id查询停售菜品数量
+     * 根据套餐id查询停售菜品数量
      * @param setmealId
      * @return
      */
