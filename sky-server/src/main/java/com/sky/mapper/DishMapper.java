@@ -64,5 +64,12 @@ public interface DishMapper {
      * @return
      */
     List<Dish> list(Dish dish);
+
+    /**
+     * 根据id查询停售菜品数量
+     * @param setmealId
+     * @return
+     */
+    Integer countBySetmealId(Long setmealId);
 }
 
