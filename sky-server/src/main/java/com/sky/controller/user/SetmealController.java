@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import com.sky.entity.SetmealDish;
 
 import java.util.List;
 
@@ -27,6 +28,14 @@ public class SetmealController {
     public Result<List<Setmeal>> list(Long categoryId) {
         log.info("用户端根据分类id查询套餐：{}", categoryId);
         List<Setmeal> list = setmealService.list(categoryId);
+        return Result.success(list);
+    }
+
+    @GetMapping("/dish/{id}")
+    @ApiOperation("根据套餐id查询包含的菜品")
+    public Result<List<SetmealDish>> dishList(@PathVariable Long id) {
+        log.info("根据套餐id查询包含的菜品：{}", id);
+        List<SetmealDish> list = setmealService.getDishItemById(id);
         return Result.success(list);
     }
 }

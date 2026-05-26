@@ -151,4 +151,9 @@ public class SetmealServiceImpl implements SetmealService {
 
         return setmealMapper.list(setmeal);
     }
+
+    @Override
+    public List<SetmealDish> getDishItemById(Long id) {
+        return setmealDishMapper.getBySetmealId(id);
+    }
 }
