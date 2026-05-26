@@ -141,4 +141,14 @@ public class SetmealServiceImpl implements SetmealService {
         }
 
     }
+
+    @Override
+    public List<Setmeal> list(Long categoryId) {
+        Setmeal setmeal = Setmeal.builder()
+                .categoryId(categoryId)
+                .status(StatusConstant.ENABLE)
+                .build();
+
+        return setmealMapper.list(setmeal);
+    }
 }

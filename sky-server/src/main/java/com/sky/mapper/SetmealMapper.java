@@ -60,4 +60,11 @@ public interface SetmealMapper {
      * @param setmeal
      */
     void update(Setmeal setmeal);
+
+    /**
+     * 根据条件查询套餐
+     * @param setmeal
+     * @return
+     */
+    List<Setmeal> list(Setmeal setmeal);
 }
