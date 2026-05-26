@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user/shop")
 @Api(tags = "用户端店铺相关接口")
 @Slf4j
-//仓库推送测试
+//仓库推送测试2
 public class ShopController {
 
     public static final String KEY = "SHOP_STATUS";
