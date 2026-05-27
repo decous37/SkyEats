@@ -35,5 +35,9 @@
             (#{name}, #{image}, #{userId}, #{dishId}, #{setmealId}, #{dishFlavor}, #{number}, #{amount}, #{createTime})
     </insert>
 
+    <delete id="deleteById">
+        delete from shopping_cart where id = #{id}
+    </delete>
+
 
 </mapper>
