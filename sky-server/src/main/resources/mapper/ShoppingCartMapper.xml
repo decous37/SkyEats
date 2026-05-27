@@ -39,5 +39,9 @@
         delete from shopping_cart where id = #{id}
     </delete>
 
+    <delete id="deleteByUserId">
+        delete from shopping_cart where user_id = #{userId}
+    </delete>
+
 
 </mapper>
