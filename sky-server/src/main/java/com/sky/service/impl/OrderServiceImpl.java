@@ -10,6 +10,7 @@ import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
+import com.sky.vo.OrderStatisticsVO;
 import lombok.extern.slf4j.Slf4j;
 import com.sky.entity.ShoppingCart;
 import com.sky.exception.AddressBookBusinessException;
@@ -183,10 +184,20 @@ public class OrderServiceImpl implements OrderService {
         //1. 查询订单主表
         Orders orders = orderMapper.getById(id);
 
-        //2. 查询订单明细
+        //2. 判断订单是否存在
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //3. 判断订单是否属于当前用户
+        if (!orders.getUserId().equals(BaseContext.getCurrentId())) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //4. 查询订单明细
         List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
 
-        //3. 组装返回给小程序的 VO
+        //5. 组装返回给小程序的 VO
         OrderVO orderVO = new OrderVO();
         BeanUtils.copyProperties(orders, orderVO);
         orderVO.setOrderDetailList(orderDetailList);
@@ -204,7 +215,18 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
         }
 
-        //3. 修改订单状态为已取消
+        //3. 判断订单是否属于当前用户
+        if (!ordersDB.getUserId().equals(BaseContext.getCurrentId())) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //4. 只有待付款和待接单的订单允许用户取消
+        if (!ordersDB.getStatus().equals(Orders.PENDING_PAYMENT)
+                && !ordersDB.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        //5. 修改订单状态为已取消
         Orders orders = Orders.builder()
                 .id(id)
                 .status(Orders.CANCELLED)
@@ -225,16 +247,34 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
         }
 
-        //3. 当前先跑通最小闭环，后续学习 WebSocket 时再通知后台
+        //3. 判断订单是否属于当前用户
+        if (!ordersDB.getUserId().equals(BaseContext.getCurrentId())) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //4. 当前先跑通最小闭环，后续学习 WebSocket 时再通知后台
         log.info("用户催单，订单id：{}", id);
     }
 
     @Override
     public void repetition(Long id) {
-        //1. 查询当前订单明细
+        //1. 根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        //2. 判断订单是否存在
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //3. 判断订单是否属于当前用户
+        if (!ordersDB.getUserId().equals(BaseContext.getCurrentId())) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //4. 查询当前订单明细
         List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
 
-        //2. 将订单明细转换为购物车对象
+        //5. 将订单明细转换为购物车对象
         List<ShoppingCart> shoppingCartList = new ArrayList<>();
 
         Long userId = BaseContext.getCurrentId();
@@ -250,7 +290,73 @@ public class OrderServiceImpl implements OrderService {
             shoppingCartList.add(shoppingCart);
         }
 
-        //3. 批量插入购物车
+        //6. 批量插入购物车
         shoppingCartMapper.insertBatch(shoppingCartList);
+    }
+
+    @Override
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        //1. 开启分页
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+
+        //2. 查询订单主表
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+
+        //3. 给每个订单补充订单明细
+        List<OrderVO> orderVOList = new ArrayList<>();
+
+        for (Orders orders : page) {
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orders, orderVO);
+
+            List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
+            orderVO.setOrderDetailList(orderDetailList);
+
+            orderVOList.add(orderVO);
+        }
+
+        return new PageResult(page.getTotal(), orderVOList);
+    }
+
+    @Override
+    public OrderStatisticsVO statistics() {
+        //1. 查询待接单数量
+        Integer toBeConfirmed = orderMapper.countByStatus(Orders.TO_BE_CONFIRMED);
+
+        //2. 查询待派送数量
+        Integer confirmed = orderMapper.countByStatus(Orders.CONFIRMED);
+
+        //3. 查询派送中数量
+        Integer deliveryInProgress = orderMapper.countByStatus(Orders.DELIVERY_IN_PROGRESS);
+
+
+        //4. 组装返回结果
+        OrderStatisticsVO orderStatisticsVO = new OrderStatisticsVO();
+        orderStatisticsVO.setToBeConfirmed(toBeConfirmed);
+        orderStatisticsVO.setConfirmed(confirmed);
+        orderStatisticsVO.setDeliveryInProgress(deliveryInProgress);
+
+        return orderStatisticsVO;
+    }
+
+    @Override
+    public OrderVO details4Admin(Long id) {
+        //1. 查询订单主表
+        Orders orders = orderMapper.getById(id);
+
+        //2. 判断订单是否存在
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //3. 查询订单明细
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+
+        //4. 组装返回给管理端的 VO
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders, orderVO);
+        orderVO.setOrderDetailList(orderDetailList);
+
+        return orderVO;
     }
 }
