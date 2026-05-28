@@ -69,4 +69,19 @@ public class AddressBookServiceImpl implements AddressBookService {
 
         return null;
     }
+
+    @Override
+    public AddressBook getById(Long id) {
+        return addressBookMapper.getById(id);
+    }
+
+    @Override
+    public void update(AddressBook addressBook) {
+        addressBookMapper.update(addressBook);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        addressBookMapper.deleteById(id);
+    }
 }

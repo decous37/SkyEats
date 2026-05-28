@@ -53,4 +53,28 @@ public class AddressBookController {
         AddressBook addressBook = addressBookService.getDefault();
         return Result.success(addressBook);
     }
+
+    @GetMapping("/{id}")
+    @ApiOperation("根据id查询地址")
+    public Result<AddressBook> getById(@PathVariable Long id) {
+        log.info("根据id查询地址：{}", id);
+        AddressBook addressBook = addressBookService.getById(id);
+        return Result.success(addressBook);
+    }
+
+    @PutMapping
+    @ApiOperation("修改地址")
+    public Result update(@RequestBody AddressBook addressBook) {
+        log.info("修改地址：{}", addressBook);
+        addressBookService.update(addressBook);
+        return Result.success();
+    }
+
+    @DeleteMapping
+    @ApiOperation("根据id删除地址")
+    public Result deleteById(Long id) {
+        log.info("根据id删除地址：{}", id);
+        addressBookService.deleteById(id);
+        return Result.success();
+    }
 }
