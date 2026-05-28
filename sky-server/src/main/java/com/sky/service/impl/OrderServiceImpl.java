@@ -2,18 +2,21 @@ package com.sky.service.impl;
 
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
 import com.sky.entity.ShoppingCart;
 import com.sky.exception.AddressBookBusinessException;
+import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.AddressBookMapper;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.service.OrderService;
+import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -68,6 +71,12 @@ public class OrderServiceImpl implements OrderService {
             amount = amount.add(cart.getAmount().multiply(new BigDecimal(cart.getNumber())));
 
         }
+        //配送费
+        amount = amount.add(new BigDecimal(6));
+
+        if (ordersSubmitDTO.getPackAmount() != null) {
+            amount = amount.add(new BigDecimal(ordersSubmitDTO.getPackAmount()));
+        }
 
         Orders orders = new Orders();
         BeanUtils.copyProperties(ordersSubmitDTO, orders);
@@ -105,5 +114,34 @@ public class OrderServiceImpl implements OrderService {
                 .orderTime(orders.getOrderTime())
                 .build();
 
+    }
+
+    @Override
+    public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) {
+        //1. 根据订单号查询订单
+        Orders orders = orderMapper.getByNumber(ordersPaymentDTO.getOrderNumber());
+
+        //2. 判断订单是否存在
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //3. 模拟支付成功，修改订单状态
+        Orders updateOrders = Orders.builder()
+                .id(orders.getId())
+                .status(Orders.TO_BE_CONFIRMED)
+                .payStatus(Orders.PAID)
+                .checkoutTime(LocalDateTime.now())
+                .build();
+
+        orderMapper.update(updateOrders);
+
+        return OrderPaymentVO.builder()
+                .nonceStr("mock_nonce_str")
+                .paySign("mock_pay_sign")
+                .timeStamp(String.valueOf(System.currentTimeMillis() / 1000))
+                .signType("MD5")
+                .packageStr("prepay_id=mock_prepay_id")
+                .build();
     }
 }
