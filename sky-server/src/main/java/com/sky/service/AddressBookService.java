@@ -23,4 +23,10 @@ public interface AddressBookService {
      * @param addressBook
      */
     void setDefault(AddressBook addressBook);
+
+    /**
+     * 查询默认地址
+     * @return
+     */
+    AddressBook getDefault();
 }

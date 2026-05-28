@@ -53,4 +53,20 @@ public class AddressBookServiceImpl implements AddressBookService {
         addressBook.setIsDefault(1);
         addressBookMapper.update(addressBook);
     }
+
+    @Override
+    public AddressBook getDefault() {
+        AddressBook addressBook = AddressBook.builder()
+                .userId(BaseContext.getCurrentId())
+                .isDefault(1)
+                .build();
+
+        List<AddressBook> list = addressBookMapper.list(addressBook);
+
+        if (list != null && list.size() == 1) {
+            return list.get(0);
+        }
+
+        return null;
+    }
 }
