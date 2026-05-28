@@ -6,6 +6,7 @@ import com.sky.dto.OrdersSubmitDTO;
 import com.sky.result.PageResult;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 
 public interface OrderService {
 
@@ -28,4 +29,30 @@ public interface OrderService {
      * @param ordersPageQueryDTO
      * @return
      */
-    PageResult pageQuery4User(OrdersPageQueryDTO ordersPageQueryDTO);}
+    PageResult pageQuery4User(OrdersPageQueryDTO ordersPageQueryDTO);
+
+    /**
+     * 查询订单详情
+     * @param id
+     * @return
+     */
+    OrderVO details(Long id);
+
+    /**
+     * 用户取消订单
+     * @param id
+     */
+    void userCancelById(Long id);
+
+    /**
+     * 用户催单
+     * @param id
+     */
+    void reminder(Long id);
+
+    /**
+     * 再来一单
+     * @param id
+     */
+    void repetition(Long id);
+}

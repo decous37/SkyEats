@@ -10,6 +10,7 @@ import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
+import lombok.extern.slf4j.Slf4j;
 import com.sky.entity.ShoppingCart;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
@@ -174,5 +176,81 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return new PageResult(page.getTotal(), orderVOList);
+    }
+
+    @Override
+    public OrderVO details(Long id) {
+        //1. 查询订单主表
+        Orders orders = orderMapper.getById(id);
+
+        //2. 查询订单明细
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+
+        //3. 组装返回给小程序的 VO
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders, orderVO);
+        orderVO.setOrderDetailList(orderDetailList);
+
+        return orderVO;
+    }
+
+    @Override
+    public void userCancelById(Long id) {
+        //1. 根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        //2. 判断订单是否存在
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //3. 修改订单状态为已取消
+        Orders orders = Orders.builder()
+                .id(id)
+                .status(Orders.CANCELLED)
+                .cancelReason("用户取消")
+                .cancelTime(LocalDateTime.now())
+                .build();
+
+        orderMapper.update(orders);
+    }
+
+    @Override
+    public void reminder(Long id) {
+        //1. 根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        //2. 判断订单是否存在
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //3. 当前先跑通最小闭环，后续学习 WebSocket 时再通知后台
+        log.info("用户催单，订单id：{}", id);
+    }
+
+    @Override
+    public void repetition(Long id) {
+        //1. 查询当前订单明细
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+
+        //2. 将订单明细转换为购物车对象
+        List<ShoppingCart> shoppingCartList = new ArrayList<>();
+
+        Long userId = BaseContext.getCurrentId();
+
+        for (OrderDetail orderDetail : orderDetailList) {
+            ShoppingCart shoppingCart = new ShoppingCart();
+
+            BeanUtils.copyProperties(orderDetail, shoppingCart);
+
+            shoppingCart.setUserId(userId);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+
+            shoppingCartList.add(shoppingCart);
+        }
+
+        //3. 批量插入购物车
+        shoppingCartMapper.insertBatch(shoppingCartList);
     }
 }
