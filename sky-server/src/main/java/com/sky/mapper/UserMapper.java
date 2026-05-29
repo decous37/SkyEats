@@ -32,7 +32,6 @@ public interface UserMapper {
      * @param end
      * @return
      */
-    @Select("select count(id) from user where create_time >= #{begin} and create_time <= #{end}")
     Integer countByCreateTime(@Param("begin") LocalDateTime begin,
                               @Param("end") LocalDateTime end);
 }
