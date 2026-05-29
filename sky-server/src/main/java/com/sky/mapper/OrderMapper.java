@@ -4,7 +4,10 @@ import com.github.pagehelper.Page;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+
+import java.time.LocalDateTime;
 
 @Mapper
 public interface OrderMapper {
@@ -51,4 +54,35 @@ public interface OrderMapper {
      */
     @Select("select count(id) from orders where status = #{status}")
     Integer countByStatus(Integer status);
+
+    /**
+     * 根据状态和下单时间统计营业额
+     * @param status
+     * @param begin
+     * @param end
+     * @return
+     */
+    Double sumByStatusAndOrderTime(@Param("status") Integer status,
+                                   @Param("begin") LocalDateTime begin,
+                                   @Param("end") LocalDateTime end);
+
+    /**
+     * 根据状态和下单时间统计订单数量
+     * @param status
+     * @param begin
+     * @param end
+     * @return
+     */
+    Integer countByStatusAndOrderTime(@Param("status") Integer status,
+                                      @Param("begin") LocalDateTime begin,
+                                      @Param("end") LocalDateTime end);
+
+    /**
+     * 根据下单时间统计订单数量
+     * @param begin
+     * @param end
+     * @return
+     */
+    Integer countByOrderTime(@Param("begin") LocalDateTime begin,
+                             @Param("end") LocalDateTime end);
 }

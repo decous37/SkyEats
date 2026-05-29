@@ -1,10 +1,9 @@
 package com.sky.mapper;
 
 import com.sky.entity.User;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
+
+import java.time.LocalDateTime;
 
 @Mapper
 public interface UserMapper {
@@ -26,4 +25,14 @@ public interface UserMapper {
             "(#{openid}, #{name}, #{phone}, #{sex}, #{idNumber}, #{avatar}, #{createTime})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insert(User user);
+
+    /**
+     * 根据创建时间统计用户数量
+     * @param begin
+     * @param end
+     * @return
+     */
+    @Select("select count(id) from user where create_time >= #{begin} and create_time <= #{end}")
+    Integer countByCreateTime(@Param("begin") LocalDateTime begin,
+                              @Param("end") LocalDateTime end);
 }
