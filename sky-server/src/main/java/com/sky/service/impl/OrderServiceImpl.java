@@ -267,6 +267,14 @@ public class OrderServiceImpl implements OrderService {
 
         //4. 当前先跑通最小闭环，后续学习 WebSocket 时再通知后台
         log.info("用户催单，订单id：{}", id);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", 2);
+        map.put("orderId", id);
+        map.put("content", "订单号：" + ordersDB.getNumber());
+
+        String message = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(message);
     }
 
     @Override
