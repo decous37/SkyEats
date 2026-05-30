@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
@@ -9,6 +10,7 @@ import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
 import com.sky.vo.OrderStatisticsVO;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import com.sky.entity.ShoppingCart;
 import com.sky.exception.AddressBookBusinessException;
@@ -30,7 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -40,15 +44,18 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDetailMapper orderDetailMapper;
     private final ShoppingCartMapper shoppingCartMapper;
     private final AddressBookMapper addressBookMapper;
+    private final WebSocketServer webSocketServer;
 
     public OrderServiceImpl(OrderMapper orderMapper,
                             OrderDetailMapper orderDetailMapper,
                             ShoppingCartMapper shoppingCartMapper,
-                            AddressBookMapper addressBookMapper) {
+                            AddressBookMapper addressBookMapper,
+                            WebSocketServer webSocketServer) {
         this.orderMapper = orderMapper;
         this.orderDetailMapper = orderDetailMapper;
         this.shoppingCartMapper = shoppingCartMapper;
         this.addressBookMapper = addressBookMapper;
+        this.webSocketServer = webSocketServer;
     }
 
     @Override
@@ -141,6 +148,14 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(updateOrders);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", 1);
+        map.put("orderId", orders.getId());
+        map.put("content", "订单号：" + orders.getNumber());
+
+        String message = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(message);
 
         return OrderPaymentVO.builder()
                 .nonceStr("mock_nonce_str")
