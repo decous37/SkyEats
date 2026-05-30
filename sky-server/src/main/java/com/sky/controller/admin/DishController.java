@@ -8,10 +8,12 @@ import com.sky.vo.DishVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.result.PageResult;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/admin/dish")
@@ -20,9 +22,19 @@ import java.util.List;
 public class DishController {
 
     private final DishService dishService;
+    private final RedisTemplate redisTemplate;
 
-    public DishController(DishService dishService) {
+    public DishController(DishService dishService, RedisTemplate redisTemplate) {
+
         this.dishService = dishService;
+        this.redisTemplate = redisTemplate;
+    }
+
+    private void cleanCache(String pattern) {
+        Set keys = redisTemplate.keys(pattern);
+        if (keys != null && keys.size() > 0) {
+            redisTemplate.delete(keys);
+        }
     }
 
     @PostMapping
@@ -30,6 +42,7 @@ public class DishController {
     public Result save(@RequestBody DishDTO dishDTO) {
         log.info("新增菜品：{}", dishDTO);
         dishService.saveWithFlavor(dishDTO);
+        cleanCache("dish_*");
         return Result.success();
     }
 
@@ -46,14 +59,17 @@ public class DishController {
     public Result delete(@RequestParam List<Long> ids) {
         log.info("菜品批量删除:{}", ids);
         dishService.deleteBatch(ids);
+        cleanCache("dish_*");
         return Result.success();
     }
+
 
     @PostMapping("/status/{status}")
     @ApiOperation("菜品启售停售")
     public Result startOrStop(@PathVariable Integer status, Long id) {
         log.info("菜品启售停售:{},{}", status, id);
         dishService.startOrStop(status, id);
+        cleanCache("dish_*");
         return Result.success();
     }
 
@@ -70,7 +86,9 @@ public class DishController {
     public Result update(@RequestBody DishDTO dishDTO) {
         log.info("修改菜品:{}", dishDTO);
         dishService.updateWithFlavor(dishDTO);
+        cleanCache("dish_*");
         return Result.success();
+
     }
 
     @GetMapping("/list")
