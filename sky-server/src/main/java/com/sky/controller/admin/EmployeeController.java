@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
+import com.sky.dto.PasswordEditDTO;
 
 
 
@@ -91,6 +92,14 @@ public class EmployeeController {
     @PostMapping("/logout")
     @ApiOperation("员工退出")
     public Result<String> logout() {
+        return Result.success();
+    }
+
+    @PutMapping("/editPassword")
+    @ApiOperation("修改密码")
+    public Result editPassword(@RequestBody PasswordEditDTO passwordEditDTO) {
+        log.info("修改密码：{}", passwordEditDTO);
+        employeeService.editPassword(passwordEditDTO);
         return Result.success();
     }
 

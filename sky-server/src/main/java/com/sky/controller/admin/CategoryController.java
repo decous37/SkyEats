@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.cache.annotation.CacheEvict;
 
 @RestController
 @RequestMapping("/admin/category")
@@ -28,6 +29,7 @@ public class CategoryController {
 
     @PostMapping
     @ApiOperation("新增分类")
+    @CacheEvict(cacheNames = "categoryCache", allEntries = true)
     public Result save(@RequestBody CategoryDTO categoryDTO) {
         log.info("新增分类：{}", categoryDTO);
         categoryService.save(categoryDTO);
@@ -44,6 +46,7 @@ public class CategoryController {
 
     @DeleteMapping
     @ApiOperation("删除分类")
+    @CacheEvict(cacheNames = "categoryCache", allEntries = true)
     public Result deleteById(Long id) {
         log.info("删除分类：{}",id);
         categoryService.deleteById(id);
@@ -52,6 +55,7 @@ public class CategoryController {
 
     @PutMapping
     @ApiOperation("修改分类")
+    @CacheEvict(cacheNames = "categoryCache", allEntries = true)
     public Result update(@RequestBody CategoryDTO categoryDTO) {
         log.info("修改分类:{}", categoryDTO);
         categoryService.update(categoryDTO);
@@ -60,6 +64,7 @@ public class CategoryController {
 
     @PostMapping("/status/{status}")
     @ApiOperation("启用禁用分类")
+    @CacheEvict(cacheNames = "categoryCache", allEntries = true)
     public Result startOrStop(@PathVariable Integer status, Long id) {
         log.info("启用禁用分类：{},{}",status, id);
         categoryService.startOrStop(status,id);

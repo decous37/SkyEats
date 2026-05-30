@@ -9,8 +9,10 @@ import com.sky.vo.SetmealVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Set;
 
 
 @RestController
@@ -20,9 +22,18 @@ import java.util.List;
 
 public class SetmealController {
     private final SetmealService setmealService;
+    private final RedisTemplate redisTemplate;
 
-    public SetmealController(SetmealService setmealService){
+    public SetmealController(SetmealService setmealService, RedisTemplate redisTemplate) {
         this.setmealService = setmealService;
+        this.redisTemplate = redisTemplate;
+    }
+
+    private void cleanCache(String pattern) {
+        Set keys = redisTemplate.keys(pattern);
+        if (keys != null && keys.size() > 0) {
+            redisTemplate.delete(keys);
+        }
     }
 
     @PostMapping
@@ -30,6 +41,7 @@ public class SetmealController {
     public Result save(@RequestBody SetmealDTO setmealDTO){
         log.info("新增套餐:{}",setmealDTO);
         setmealService.saveWithDish(setmealDTO);
+        cleanCache("setmeal_*");
         return Result.success();
     }
 
@@ -46,6 +58,7 @@ public class SetmealController {
     public Result delete(@RequestParam List<Long> ids){
         log.info("批量删除套餐:{}",ids);
         setmealService.deleteBatch(ids);
+        cleanCache("setmeal_*");
         return Result.success();
     }
 
@@ -54,6 +67,7 @@ public class SetmealController {
     public Result startOrStop(@PathVariable Integer status, Long id){
         log.info("套餐启售停售:{},{}",status, id);
         setmealService.startOrStop(status, id);
+        cleanCache("setmeal_*");
         return Result.success();
     }
 
@@ -70,6 +84,7 @@ public class SetmealController {
     public Result update(@RequestBody SetmealDTO setmealDTO){
         log.info("修改套餐:{}",setmealDTO);
         setmealService.updateWithDish(setmealDTO);
+        cleanCache("setmeal_*");
         return Result.success();
     }
 

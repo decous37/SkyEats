@@ -7,6 +7,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+//import springfox.documentation.annotations.Cacheable;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class CategoryController {
 
     @GetMapping("/list")
     @ApiOperation("查询分类")
+    @Cacheable(cacheNames = "categoryCache", key = "#p0 == null ? 'all' : #p0")
     public Result<List<Category>> list(Integer type) {
         log.info("用户端查询分类：{}", type);
         List<Category> list = categoryService.list(type);

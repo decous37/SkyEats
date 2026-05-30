@@ -2,8 +2,7 @@ package com.sky.service.impl;
 
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
-import com.sky.dto.EmployeeLoginDTO;
-import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.*;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
@@ -14,7 +13,6 @@ import com.sky.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
-import com.sky.dto.EmployeeDTO;
 import com.sky.constant.PasswordConstant;
 import com.sky.context.BaseContext;
 import org.springframework.beans.BeanUtils;
@@ -67,6 +65,35 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setUpdateUser(currentId);
         //7.调用Mapper插入数据库
         employeeMapper.insert(employee);
+    }
+
+    @Override
+    public void editPassword(PasswordEditDTO passwordEditDTO) {
+        //1. 获取当前登录员工id
+        Long empId = BaseContext.getCurrentId();
+
+        //2. 根据员工id查询员工
+        Employee employee = employeeMapper.getById(empId);
+
+        //3. 判断员工是否存在
+        if (employee == null) {
+            throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+
+        //4. 校验旧密码是否正确
+        String oldPassword = passwordEditDTO.getOldPassword();
+        if (!oldPassword.equals(employee.getPassword())) {
+            throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
+        }
+
+        //5. 设置新密码
+        Employee updateEmployee = Employee.builder()
+                .id(empId)
+                .password(passwordEditDTO.getNewPassword())
+                .build();
+
+        //6. 更新数据库
+        employeeMapper.update(updateEmployee);
     }
 
     /**
