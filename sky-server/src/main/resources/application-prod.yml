@@ -10,3 +10,14 @@ sky:
   upload:
     dir-path: ${UPLOAD_DIR:/opt/sky/upload}
     access-url-prefix: ${UPLOAD_ACCESS_URL:https://你的域名.com/upload/}
+  jwt:
+    admin-secret-key: ${JWT_ADMIN_SECRET:itcast}
+    admin-ttl: ${JWT_ADMIN_TTL:7200000}
+    admin-token-name: token
+    user-secret-key: ${JWT_USER_SECRET:itcast}
+    user-ttl: ${JWT_USER_TTL:7200000}
+    user-token-name: authentication
+  wechat:
+    login-mode: ${WECHAT_LOGIN_MODE:real}
+    appid: ${WECHAT_APPID:你的微信小程序appid}
+    secret: ${WECHAT_SECRET:你的微信小程序secret}
