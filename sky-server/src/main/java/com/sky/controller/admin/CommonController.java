@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.sky.properties.UploadProperties;
 
 import java.io.File;
 import java.util.UUID;
@@ -27,8 +28,12 @@ import java.util.UUID;
 @Slf4j
 public class CommonController {
     private final AliOssUtil aliOssUtil;
-    public CommonController(AliOssUtil aliOssUtil) {
+    private final UploadProperties uploadProperties;
+
+    public CommonController(AliOssUtil aliOssUtil, UploadProperties uploadProperties)
+    {
         this.aliOssUtil = aliOssUtil;
+        this.uploadProperties = uploadProperties;
     }
 
     @PostMapping("/upload")
@@ -44,8 +49,8 @@ public class CommonController {
             String fileName = UUID.randomUUID().toString() + extension;
 //            String objectName = UUID.randomUUID().toString() + extension;
 
-            //保存到本地路径，因为暂时没有阿里云oss账户
-            String dirPath = "E:\\TempFiles\\software\\Frontend\\nginx-1.20.2\\html\\sky\\upload";            File dir = new File(dirPath);
+            String dirPath = uploadProperties.getDirPath();
+            File dir = new File(dirPath);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
@@ -55,7 +60,7 @@ public class CommonController {
 
 //            String filePath =aliOssUtil.upload(file.getBytes(), objectName);
 
-            String filePath = "http://localhost/upload/" +fileName;
+            String filePath = uploadProperties.getAccessUrlPrefix() + fileName;
             return Result.success(filePath);
 
 

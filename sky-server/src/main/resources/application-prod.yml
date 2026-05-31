@@ -1,0 +1,12 @@
+sky:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: ${MYSQL_HOST:localhost}
+    port: ${MYSQL_PORT:3306}
+    database: ${MYSQL_DATABASE:sky_take_out}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:123456}
+
+  upload:
+    dir-path: ${UPLOAD_DIR:/opt/sky/upload}
+    access-url-prefix: ${UPLOAD_ACCESS_URL:https://你的域名.com/upload/}

@@ -45,3 +45,7 @@ sky:
     user-secret-key: itcast
     user-ttl: 7200000
     user-token-name: authentication
+
+  upload:
+    dir-path: E:/TempFiles/software/Frontend/nginx-1.20.2/html/sky/upload
+    access-url-prefix: http://localhost/upload/

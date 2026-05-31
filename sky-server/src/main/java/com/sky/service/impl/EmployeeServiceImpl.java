@@ -49,7 +49,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         BeanUtils.copyProperties(employeeDTO, employee);
 
         //3.设置默认密码
-        employee.setPassword(PasswordConstant.DEFAULT_PASSWORD);
+        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
 
         //4.设置默认状态
         employee.setStatus(StatusConstant.ENABLE);
@@ -81,7 +81,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         //4. 校验旧密码是否正确
-        String oldPassword = passwordEditDTO.getOldPassword();
+        String oldPassword = DigestUtils.md5DigestAsHex(passwordEditDTO.getOldPassword().getBytes());
         if (!oldPassword.equals(employee.getPassword())) {
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
@@ -89,7 +89,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         //5. 设置新密码
         Employee updateEmployee = Employee.builder()
                 .id(empId)
-                .password(passwordEditDTO.getNewPassword())
+                .password(DigestUtils.md5DigestAsHex(passwordEditDTO.getNewPassword().getBytes()))
                 .build();
 
         //6. 更新数据库
@@ -106,6 +106,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         String username = employeeLoginDTO.getUsername();
         String password = employeeLoginDTO.getPassword();
 
+
         //1、根据用户名查询数据库中的数据
         Employee employee = employeeMapper.getByUsername(username);
 
@@ -114,6 +115,8 @@ public class EmployeeServiceImpl implements EmployeeService {
             //账号不存在
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
+
+        password = DigestUtils.md5DigestAsHex(password.getBytes());
 
         //密码比对：前端传来的是明文密码，数据库中保存的是 MD5 摘要
 //        password = DigestUtils.md5DigestAsHex(password.getBytes());
